@@ -48,13 +48,15 @@ dev <- png(filename="plot6.png", width=480, height=480 )
 yearslice <- yeartotal[yeartotal$City %in% c("24510"), ]
 yearslice[,3] <- (yearslice[,3] - min(yearslice[,3])) / (max(yearslice[,3])-min(yearslice[,3]))
 
+# Increase Margin for Double Line Y Axis Title
+par(mar=c(5,5,4,2))
 plot(yearslice$Year, yearslice$Total, 
      col="black",
      main="PM2.5 Motor Vehicle Emissions",
      type="b",
      lty="solid",
      xlab="Year",
-     ylab="Total Emissions (Scaled between 0-1)"
+     ylab="Relative Total Emissions\n(Seperatly Scaled between 0-1)"
 )
 
 abline(glm(yearslice$Total~yearslice$Year),col="green",lwd=1)
