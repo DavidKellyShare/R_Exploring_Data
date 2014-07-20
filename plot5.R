@@ -8,7 +8,10 @@
 ##   Scale as Needed
 ##   Plot Results
 ##
+## Required Librbaries: ggplot2, scales
 
+library("ggplot2")
+library("scales")
 ###################################
 # Source and Filter the Data
 ###################################
@@ -25,16 +28,26 @@ print("Merging Data on SCC")
 datamerge<-merge(NEI,SCC,by.x="SCC", by.y="SCC")
 
 print("Filtering Data")
-datasubset1<-subset(datamerge[datamerge$SCC.Level.One == "Mobile Sources", ])
+datasubset1<-subset(datamerge[grep("^Mobile", datamerge$EI.Sector), ])
 datasubset<-subset(datasubset1[datasubset1$fips == "24510", ])
 
 ###################################
 # Aggregate and Scale the Data
 ###################################
 print("Aggregating Data")
-yeartotal<-aggregate(datasubset$Emissions, by = list(datasubset$year), FUN="sum")
 
-colnames(yeartotal)<-c("Year", "Total")
+# Rename existing sectors and calculate Individual Sectors and All Combined
+datasubset$EI.Sector<-sub("Mobile - ", "", datasubset$EI.Sector)
+datasubset$ALL.Sector<-" All Mobile Sources"
+yeartotal1<-aggregate(datasubset$Emissions, by = list(datasubset$year,datasubset$EI.Sector), FUN="sum")
+grandtotal<-aggregate(datasubset$Emissions, by = list(datasubset$year,datasubset$ALL.Sector), FUN="sum")
+
+# Concatenate Data Frames
+yeartotal<-rbind(yeartotal1,grandtotal)
+
+# Set Column Names and Type
+colnames(yeartotal)<-c("Year", "Sector", "Total")
+yeartotal$Year<-as.factor(yeartotal$Year)
 
 ###################################
 # Plot the Data
@@ -42,13 +55,19 @@ colnames(yeartotal)<-c("Year", "Total")
 print("Plotting Data")
 dev <- png(filename="plot5.png", width=480, height=480 )
 
-plot(yeartotal, 
-     col="blue",
-     main="Baltimore City, Maryland PM2.5 Moter Vehicle Emissions",
-     type="b"
-)
 
-abline(glm(yeartotal$Total~yeartotal$Year),col="red",lwd=1)
-legend("topright","Overall Trend", col="Red",lwd=1)
+print(ggplot(yeartotal, aes(x=Year,
+                            y=Total, 
+                            group=Sector,
+                            color=Sector))
+      + ggtitle("Total United States PM2.5 Emissions\nby Mobile Sectors")
+      + ylab("Total (thousands)")
+      + geom_line() 
+      + geom_point()
+      #+ theme(legend.position=c(0.5,.5))
+      + coord_trans(y="log2",limy=c(1,900))
+      #+ coord_cartesian(ylim=c(100,900))
+      
+)
 
 ret <- dev.off()
