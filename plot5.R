@@ -61,7 +61,7 @@ print(ggplot(yeartotal, aes(x=Year,
                             group=Sector,
                             color=Sector))
       + ggtitle("Total Baltimore PM2.5 Emissions\nby Mobile Sectors")
-      + ylab("Total")
+      + ylab("Total (Log2  Scale)")
       + geom_line() 
       + geom_point()
       #+ theme(legend.position=c(0.5,.5))

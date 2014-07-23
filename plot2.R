@@ -53,6 +53,6 @@ plot(yeartotal,
 )
 
 abline(glm(yeartotal$total~yeartotal$year),col="red",lwd=1)
-legend("topright","Overall Trend", col="Red",lwd=1)
+legend("topright",c("Actuals", "Overall Trend"), col=c("blue","Red"),lwd=1)
 
 ret <- dev.off()
